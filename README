@@ -2,6 +2,5 @@ name: Anusha Dudella
 eid: ad48847
 githubusername: anushadudella
 I used Gemini (AI) and Claude (AI) to help with debugging of code and helping with Git version control issues.
-Notes: I ran test cases such as test 404 - "user not found," test 400 - "duplicate user", getting all the users, and getting city by name for user (Austin)
-and these cases were run using the curl command on terminal.
+Notes: I ran test cases such as test 404 - "user not found," test 400 - "duplicate user", getting all the users, and getting city by name for user (Austin) and these cases were run using the curl command on terminal.
 Notes for TA: Thanks for taking the time to grade my work :)
