@@ -87,8 +87,50 @@ class Admin(Base):
         return fields
 
 
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
+    password = Column(String)
 
-## Admin REST API
+    def as_dict(self):
+        fields = {}
+        for c in self.__table__.columns:
+            fields[c.name] = getattr(self, c.name)
+        return fields
+
+
+class City(Base):
+    __tablename__ = 'city'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
+    url = Column(String)
+    adminid = Column(Integer, ForeignKey('admin.id'))
+
+    def as_dict(self):
+        fields = {}
+        for c in self.__table__.columns:
+            fields[c.name] = getattr(self, c.name)
+        return fields
+
+
+class UserCity(Base):
+    __tablename__ = 'usercity'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cityId = Column(Integer, ForeignKey('city.id'))
+    userId = Column(Integer, ForeignKey('user.id'))
+    month = Column(String)
+    year = Column(String)
+    weather_params = Column(String)
+
+    def as_dict(self):
+        fields = {}
+        for c in self.__table__.columns:
+            fields[c.name] = getattr(self, c.name)
+        return fields
+
+
+## This is the Admin REST API
 @app.route("/admin", methods=['POST'])
 def add_admin():
     app.logger.info("Inside add_admin")
@@ -146,13 +188,136 @@ def delete_admin_by_id(id):
 
     app.logger.info("Found admin:%s\n", str(admin))
     if admin == None:
-        status = ("Admin with id {id} not found.\n").format(id=id)
+        status = ("Admin with id {id} not found!\n").format(id=id)
         return Response(status, status=404)
     else:
         session.delete(admin)
         session.commit()
-        status = ("Admin with id {id} deleted.\n").format(id=id)
+        status = ("Admin with id {id} deleted! \n").format(id=id)
         return Response(status, status=200)
+
+
+## This is the User REST API
+@app.route("/users", methods=['POST'])
+def add_user():
+    data = request.json
+    name = data['name']
+    password = data['password']
+    session = DBSession()
+    existing = session.query(User).filter_by(name=name).first()
+    if existing:
+        return Response(f"Sorry, user with {name} already exists :(", status=400)
+    user = User(name=name, password=password)
+    session.add(user)
+    session.commit()
+    return user.as_dict()
+
+@app.route("/users")
+def get_users():
+    session = DBSession()
+    users = session.query(User).all()
+    return {"users": [u.as_dict() for u in users]}
+
+@app.route("/users/<id>")
+def get_user_by_id(id):
+    session = DBSession()
+    user = session.get(User, id)
+    if user is None:
+        return Response(f"Sorry, person with id {id} not found.", status=404)
+    return user.as_dict()
+
+@app.route("/users/<id>", methods=['DELETE'])
+def delete_user_by_id(id):
+    session = DBSession()
+    user = session.query(User).filter_by(id=id).first()
+    if user is None:
+        return Response(f"Sorry, user with id {id} not found.", status=404)
+    session.delete(user)
+    session.commit()
+    return Response(f"Sorry, person with {id} deleted.", status=200)
+
+
+## This is the City REST API
+@app.route("/admin/<admin_id>/cities", methods=['POST'])
+def add_city(admin_id):
+    session = DBSession()
+    admin = session.get(Admin, admin_id)
+    if admin is None:
+        return Response(f"Sorry, admin with id {admin_id} not found", status=404)
+    data = request.json
+    city = City(name=data['name'], url=data['url'], adminid=admin_id)
+    session.add(city)
+    session.commit()
+    return city.as_dict()
+
+@app.route("/admin/<admin_id>/cities")
+def get_cities(admin_id):
+    session = DBSession()
+    admin = session.get(Admin, admin_id)
+    if admin is None:
+        return Response(f"Sorry, admin with id {admin_id} not found.", status=404)
+    cities = session.query(City).filter_by(adminid=admin_id).all()
+    return {"cities": [c.as_dict() for c in cities]}
+
+@app.route("/admin/<admin_id>/cities/<city_id>")
+def get_city_by_id(admin_id, city_id):
+    session = DBSession()
+    if session.get(Admin, admin_id) is None:
+        return Response(f"Admin with id {admin_id} not found.", status=404)
+    city = session.get(City, city_id)
+    if city is None:
+        return Response(f"City with id {city_id} not found.", status=404)
+    return city.as_dict()
+
+@app.route("/admin/<admin_id>/cities/<city_id>", methods=['DELETE'])
+def delete_city_by_id(admin_id, city_id):
+    session = DBSession()
+    if session.get(Admin, admin_id) is None:
+        return Response(f"Admin with id {admin_id} not found.", status=404)
+    city = session.query(City).filter_by(id=city_id).first()
+    if city is None:
+        return Response(f"City with id {city_id} not found.", status=404)
+    session.delete(city)
+    session.commit()
+    return Response(f"City with {city_id} deleted.", status=200)
+
+
+## This is the UserCity REST API
+@app.route("/users/<user_id>/cities", methods=['POST'])
+def add_user_city(user_id):
+    session = DBSession()
+    user = session.get(User, user_id)
+    if user is None:
+        return Response(f"User with id {user_id} not found.", status=404)
+    data = request.json
+    if len(str(data['year'])) != 4:
+        return Response("Please make sure the year is exactly four digits.", status=400)
+    city = session.query(City).filter_by(name=data['name']).first()
+    if city is None:
+        return Response(f"Sorry, city with name {data['name']} not found.", status=404)
+    user_city = UserCity(cityId=city.id, userId=user_id, month=data['month'], year=data['year'], weather_params=data['params'])
+    session.add(user_city)
+    session.commit()
+    return user_city.as_dict()
+
+@app.route("/users/<user_id>/cities")
+def get_user_cities(user_id):
+    session = DBSession()
+    user = session.get(User, user_id)
+    if user is None:
+        return Response(f"Sorry, user with id {user_id} not found.", status=404)
+    city_name = request.args.get('name')
+    if city_name:
+        city_name = city_name.strip('"')
+        city = session.query(City).filter_by(name=city_name).first()
+        if city is None:
+            return Response(f"Sorry, city with name {city_name} not found.", status=404)
+        uc = session.query(UserCity).filter_by(userId=user_id, cityId=city.id).first()
+        if uc is None:
+            return Response(f"No, city with name {city_name} not being tracked by user {user.name}.", status=404)
+        return {"name": city.name, "month": uc.month, "year": str(uc.year), "weather_params": uc.weather_params}
+    user_cities = session.query(UserCity).filter_by(userId=user_id).all()
+    return {"usercities": [uc.as_dict() for uc in user_cities]}
 
 
 @app.route("/logout",methods=['GET'])
@@ -221,4 +386,4 @@ if __name__ == "__main__":
 
     app.debug = False
     app.logger.info('Portal started...')
-    app.run(host='0.0.0.0', port=5009) 
+    app.run(host='0.0.0.0', port=5009)

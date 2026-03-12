@@ -1,0 +1,236 @@
+Portal started...
+ * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://10.1.83.51:5009/ (Press CTRL+C to quit)
+Portal started...
+ * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://10.1.83.51:5009/ (Press CTRL+C to quit)
+Portal started...
+ * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://10.1.83.51:5009/ (Press CTRL+C to quit)
+Portal started...
+ * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://10.1.83.51:5009/ (Press CTRL+C to quit)
+BEGIN (implicit)
+PRAGMA main.table_info("admin")
+[raw sql] ()
+PRAGMA temp.table_info("admin")
+[raw sql] ()
+PRAGMA main.table_info("user")
+[raw sql] ()
+PRAGMA temp.table_info("user")
+[raw sql] ()
+PRAGMA main.table_info("city")
+[raw sql] ()
+PRAGMA temp.table_info("city")
+[raw sql] ()
+PRAGMA main.table_info("usercity")
+[raw sql] ()
+PRAGMA temp.table_info("usercity")
+[raw sql] ()
+
+CREATE TABLE admin (
+	id INTEGER NOT NULL, 
+	name VARCHAR, 
+	password VARCHAR, 
+	PRIMARY KEY (id)
+)
+
+
+[no key 0.00019s] ()
+
+CREATE TABLE user (
+	id INTEGER NOT NULL, 
+	name VARCHAR, 
+	password VARCHAR, 
+	PRIMARY KEY (id)
+)
+
+
+[no key 0.00003s] ()
+
+CREATE TABLE city (
+	id INTEGER NOT NULL, 
+	name VARCHAR, 
+	url VARCHAR, 
+	adminid INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(adminid) REFERENCES admin (id)
+)
+
+
+[no key 0.00003s] ()
+
+CREATE TABLE usercity (
+	id INTEGER NOT NULL, 
+	"cityId" INTEGER, 
+	"userId" INTEGER, 
+	month VARCHAR, 
+	year VARCHAR, 
+	weather_params VARCHAR, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY("cityId") REFERENCES city (id), 
+	FOREIGN KEY("userId") REFERENCES user (id)
+)
+
+
+[no key 0.00005s] ()
+COMMIT
+Inside add_admin
+Received request:{'name': 'admin1', 'password': 'admin1'}
+BEGIN (implicit)
+INSERT INTO admin (name, password) VALUES (?, ?)
+[generated in 0.00009s] ('admin1', 'admin1')
+COMMIT
+BEGIN (implicit)
+SELECT admin.id AS admin_id, admin.name AS admin_name, admin.password AS admin_password 
+FROM admin 
+WHERE admin.id = ?
+[generated in 0.00009s] (1,)
+127.0.0.1 - - [09/Mar/2026 13:23:39] "POST /admin HTTP/1.1" 200 -
+BEGIN (implicit)
+SELECT user.id AS user_id, user.name AS user_name, user.password AS user_password 
+FROM user 
+WHERE user.name = ?
+ LIMIT ? OFFSET ?
+[generated in 0.00012s] ('User1', 1, 0)
+INSERT INTO user (name, password) VALUES (?, ?)
+[generated in 0.00005s] ('User1', 'User1')
+COMMIT
+BEGIN (implicit)
+SELECT user.id AS user_id, user.name AS user_name, user.password AS user_password 
+FROM user 
+WHERE user.id = ?
+[generated in 0.00007s] (1,)
+127.0.0.1 - - [09/Mar/2026 13:24:02] "POST /users HTTP/1.1" 200 -
+BEGIN (implicit)
+SELECT admin.id AS admin_id, admin.name AS admin_name, admin.password AS admin_password 
+FROM admin 
+WHERE admin.id = ?
+[generated in 0.00008s] ('1',)
+INSERT INTO city (name, url, adminid) VALUES (?, ?, ?)
+[generated in 0.00007s] ('Austin', 'http://austin-weather-url', '1')
+COMMIT
+BEGIN (implicit)
+SELECT city.id AS city_id, city.name AS city_name, city.url AS city_url, city.adminid AS city_adminid 
+FROM city 
+WHERE city.id = ?
+[generated in 0.00007s] (1,)
+127.0.0.1 - - [09/Mar/2026 13:24:25] "POST /admin/1/cities HTTP/1.1" 200 -
+BEGIN (implicit)
+SELECT admin.id AS admin_id, admin.name AS admin_name, admin.password AS admin_password 
+FROM admin 
+WHERE admin.id = ?
+[cached since 43.08s ago] ('1',)
+INSERT INTO city (name, url, adminid) VALUES (?, ?, ?)
+[cached since 43.08s ago] ('Austin', 'http://austin-weather-url', '1')
+COMMIT
+BEGIN (implicit)
+SELECT city.id AS city_id, city.name AS city_name, city.url AS city_url, city.adminid AS city_adminid 
+FROM city 
+WHERE city.id = ?
+[cached since 43.08s ago] (2,)
+127.0.0.1 - - [09/Mar/2026 13:25:08] "POST /admin/1/cities HTTP/1.1" 200 -
+BEGIN (implicit)
+SELECT user.id AS user_id, user.name AS user_name, user.password AS user_password 
+FROM user 
+WHERE user.id = ?
+[generated in 0.00009s] ('1',)
+SELECT city.id AS city_id, city.name AS city_name, city.url AS city_url, city.adminid AS city_adminid 
+FROM city 
+WHERE city.name = ?
+ LIMIT ? OFFSET ?
+[generated in 0.00007s] ('Austin', 1, 0)
+INSERT INTO usercity ("cityId", "userId", month, year, weather_params) VALUES (?, ?, ?, ?, ?)
+[generated in 0.00005s] (1, '1', 'August', '2023', 'TMAX, TMIN')
+COMMIT
+BEGIN (implicit)
+SELECT usercity.id AS usercity_id, usercity."cityId" AS "usercity_cityId", usercity."userId" AS "usercity_userId", usercity.month AS usercity_month, usercity.year AS usercity_year, usercity.weather_params AS usercity_weather_params 
+FROM usercity 
+WHERE usercity.id = ?
+[generated in 0.00006s] (1,)
+127.0.0.1 - - [09/Mar/2026 13:25:37] "POST /users/1/cities HTTP/1.1" 200 -
+Portal started...
+ * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://10.1.83.51:5009/ (Press CTRL+C to quit)
+BEGIN (implicit)
+PRAGMA main.table_info("admin")
+[raw sql] ()
+PRAGMA main.table_info("user")
+[raw sql] ()
+PRAGMA main.table_info("city")
+[raw sql] ()
+PRAGMA main.table_info("usercity")
+[raw sql] ()
+COMMIT
+Inside add_admin
+Received request:{'name': 'Admin1', 'password': 'Admin1'}
+BEGIN (implicit)
+INSERT INTO admin (name, password) VALUES (?, ?)
+[generated in 0.00008s] ('Admin1', 'Admin1')
+COMMIT
+BEGIN (implicit)
+SELECT admin.id AS admin_id, admin.name AS admin_name, admin.password AS admin_password 
+FROM admin 
+WHERE admin.id = ?
+[generated in 0.00007s] (2,)
+127.0.0.1 - - [11/Mar/2026 22:35:10] "POST /admin HTTP/1.1" 200 -
+BEGIN (implicit)
+SELECT user.id AS user_id, user.name AS user_name, user.password AS user_password 
+FROM user 
+WHERE user.name = ?
+ LIMIT ? OFFSET ?
+[generated in 0.00009s] ('User1', 1, 0)
+127.0.0.1 - - [11/Mar/2026 22:35:31] "[31m[1mPOST /users HTTP/1.1[0m" 400 -
+BEGIN (implicit)
+SELECT user.id AS user_id, user.name AS user_name, user.password AS user_password 
+FROM user 
+WHERE user.name = ?
+ LIMIT ? OFFSET ?
+[cached since 20.66s ago] ('User2', 1, 0)
+INSERT INTO user (name, password) VALUES (?, ?)
+[generated in 0.00006s] ('User2', 'User2')
+COMMIT
+BEGIN (implicit)
+SELECT user.id AS user_id, user.name AS user_name, user.password AS user_password 
+FROM user 
+WHERE user.id = ?
+[generated in 0.00006s] (2,)
+127.0.0.1 - - [11/Mar/2026 22:35:51] "POST /users HTTP/1.1" 200 -
+BEGIN (implicit)
+SELECT admin.id AS admin_id, admin.name AS admin_name, admin.password AS admin_password 
+FROM admin 
+WHERE admin.id = ?
+[generated in 0.00008s] ('2',)
+INSERT INTO city (name, url, adminid) VALUES (?, ?, ?)
+[generated in 0.00007s] ('Austin', 'http://austin-url', '2')
+COMMIT
+BEGIN (implicit)
+SELECT city.id AS city_id, city.name AS city_name, city.url AS city_url, city.adminid AS city_adminid 
+FROM city 
+WHERE city.id = ?
+[generated in 0.00006s] (3,)
+127.0.0.1 - - [11/Mar/2026 22:36:09] "POST /admin/2/cities HTTP/1.1" 200 -
+BEGIN (implicit)
+SELECT user.id AS user_id, user.name AS user_name, user.password AS user_password 
+FROM user 
+WHERE user.id = ?
+[generated in 0.00026s] ('2',)
+SELECT city.id AS city_id, city.name AS city_name, city.url AS city_url, city.adminid AS city_adminid 
+FROM city 
+WHERE city.name = ?
+ LIMIT ? OFFSET ?
+[generated in 0.00010s] ('Austin', 1, 0)
+INSERT INTO usercity ("cityId", "userId", month, year, weather_params) VALUES (?, ?, ?, ?, ?)
+[generated in 0.00006s] (1, '2', 'August', '2023', 'TMAX, TMIN')
+COMMIT
+BEGIN (implicit)
+SELECT usercity.id AS usercity_id, usercity."cityId" AS "usercity_cityId", usercity."userId" AS "usercity_userId", usercity.month AS usercity_month, usercity.year AS usercity_year, usercity.weather_params AS usercity_weather_params 
+FROM usercity 
+WHERE usercity.id = ?
+[generated in 0.00006s] (2,)
+127.0.0.1 - - [11/Mar/2026 22:36:24] "POST /users/2/cities HTTP/1.1" 200 -
